@@ -61,6 +61,10 @@ func main() {
 	fmt.Println(titleString)
 	fmt.Println(priceString)
 	fmt.Println(mileageString)
+
+	if err := os.Remove("output.html"); err != nil {
+		panic(err)
+	}
 }
 
 func getInnerHTML(e htmlElement) (string, error) {
