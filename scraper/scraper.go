@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -10,6 +9,7 @@ import (
 
 	"context"
 
+	"github.com/JaiiR320/carlistingsaver/types"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/chromedp/chromedp"
 )
@@ -24,15 +24,9 @@ const (
 	closeBtn              = `x1i10hfl x6umtig x1b1mbwd xaqea5y xav7gou x1ypdohk xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r x16tdsg8 x1hl2dhg xggy1nq x87ps6o x1lku1pv x1a2a7pz x6s0dn4 x14yjl9h xudhj91 x18nykt9 xww2gxu x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x78zum5 xl56j7k xexx8yu x4uap5 x18d9i69 xkhd6sd x1n2onr6 xc9qbxq x14qfxbe x1qhmfi1`
 )
 
-// A struct to represent a Listing, will add more fields later
-type Listing struct {
-	Url     string
-	Price   int
-	Title   string
-	Mileage int
-}
-
-func GetListing(url string) Listing {
+// Get a listing from a given url.
+// Returns a listing object with the data from the url
+func GetListing(url string) types.Listing {
 	saveHTML(url)
 
 	mileageString, err := getInnerHTML(mileageClassesRaw, 1)
@@ -77,16 +71,11 @@ func GetListing(url string) Listing {
 		log.Fatal(err)
 	}
 
-	fmt.Println(mileage)
-	return Listing{
-		Url:     url,
-		Price:   price,
-		Title:   titleString,
-		Mileage: mileage,
-	}
+	return *types.NewListing(url, price, titleString, mileage)
 }
 
-func getInnerHTML(rawClassString string, occurance int) (string, error) {
+// gets the inner HTML of an element with the given classes and index
+func getInnerHTML(rawClassString string, index int) (string, error) {
 	classes := fixClasses(rawClassString)
 	// Open the file
 	f, err := os.Open("output.html")
@@ -102,7 +91,7 @@ func getInnerHTML(rawClassString string, occurance int) (string, error) {
 	}
 
 	// Find the element with the two classes
-	s := doc.Find(classes).Eq(occurance)
+	s := doc.Find(classes).Eq(index)
 	html, err := s.Html()
 	if err != nil {
 		return "", err
@@ -110,6 +99,7 @@ func getInnerHTML(rawClassString string, occurance int) (string, error) {
 	return html, nil
 }
 
+// saves the page's html to a file
 func saveHTML(url string) {
 	// Create a new context
 	ctx, cancel := chromedp.NewContext(context.Background())
@@ -138,7 +128,7 @@ func saveHTML(url string) {
 	log.Println("HTML has been saved to output.html")
 }
 
-// paste in the raw class list from the HTML
+// converts raw list of classes to a format that goquery can use
 func fixClasses(classes string) string {
 	return "." + strings.ReplaceAll(classes, " ", ".")
 }

@@ -2,22 +2,26 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 
-	"github.com/JaiiR320/carlistingsaver/scraper"
+	"github.com/JaiiR320/carlistingsaver/types"
 	_ "github.com/lib/pq"
 )
 
+// A storage interface for getting, creating, storing
+// and deleting listings in a storage container
 type Storage interface {
-	CreateListing(listing *scraper.Listing) error
-	GetListings() ([]*scraper.Listing, error)
+	CreateListing(listing *types.Listing) error
+	GetListings() ([]*types.Listing, error)
+	DeleteListing(id int) error
 	DropTables() error
 }
 
+// A Postgres implementation of the Storage interface
 type PostgresStore struct {
 	db *sql.DB
 }
 
+// Creates a new instance of a postgres db
 func NewPostgresStore() (*PostgresStore, error) {
 	connStr := "user=postgres dbname=postgres password=JairMeza1 sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
@@ -32,50 +36,55 @@ func NewPostgresStore() (*PostgresStore, error) {
 	}, nil
 }
 
-func (s *PostgresStore) Init() error {
+// Initializes the postgres db's tables
+// If drop is true, then the tables will be dropped before being created
+func (s *PostgresStore) Init(drop bool) error {
+	if drop {
+		s.DropTables()
+	}
 	return s.createListingTable()
 }
 
+// Creates the listing table
 func (s *PostgresStore) createListingTable() error {
 	query := `create table if not exists listing (
 		id serial primary key,
 		url varchar(255),
 		title varchar(255),
 		price serial,
-		mileage serial
+		mileage serial,
+		created_at timestamp
 	)`
 
 	_, err := s.db.Exec(query)
 	return err
 }
 
-func (s *PostgresStore) CreateListing(l *scraper.Listing) error {
+// Creates a new listing in the postgres db
+// Takes a pointer to a listing to use for the insert
+func (s *PostgresStore) CreateListing(l *types.Listing) error {
 	query := `insert into listing 
-	(url, title, price, mileage)
-	values ($1, $2, $3, $4)`
-	resp, err := s.db.Query(
+	(url, title, price, mileage, created_at)
+	values ($1, $2, $3, $4, $5)`
+	_, err := s.db.Query(
 		query,
 		l.Url,
 		l.Title,
 		l.Price,
-		l.Mileage)
+		l.Mileage,
+		l.CreatedAt)
 
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%+v\n", resp)
-
-	return nil
+	return err
 }
 
-func (s *PostgresStore) GetListings() ([]*scraper.Listing, error) {
+// Gets all listings from the postgres db
+func (s *PostgresStore) GetListings() ([]*types.Listing, error) {
 	rows, err := s.db.Query("select * from listing")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	listings := []*scraper.Listing{}
+	listings := []*types.Listing{}
 	for rows.Next() {
 		l, err := scanIntoListing(rows)
 		if err != nil {
@@ -86,21 +95,31 @@ func (s *PostgresStore) GetListings() ([]*scraper.Listing, error) {
 	return listings, nil
 }
 
-func scanIntoListing(rows *sql.Rows) (*scraper.Listing, error) {
-	l := new(scraper.Listing)
-	id := 0
-	err := rows.Scan(
-		&id,
-		&l.Url,
-		&l.Title,
-		&l.Price,
-		&l.Mileage)
-
-	return l, err
+// Deletes a listing from the postgres db
+func (s *PostgresStore) DeleteListing(id int) error {
+	query := `delete from listing where id = $1`
+	_, err := s.db.Exec(query, id)
+	return err
 }
 
+// Drops all tables from the postgres db
 func (s *PostgresStore) DropTables() error {
 	query := `drop table if exists listing`
 	_, err := s.db.Exec(query)
 	return err
+}
+
+// Scans a row from the postgres db into a listing
+func scanIntoListing(rows *sql.Rows) (*types.Listing, error) {
+	l := new(types.Listing)
+
+	err := rows.Scan(
+		&l.Id,
+		&l.Url,
+		&l.Title,
+		&l.Price,
+		&l.Mileage,
+		&l.CreatedAt)
+
+	return l, err
 }
