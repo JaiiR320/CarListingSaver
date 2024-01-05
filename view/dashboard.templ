@@ -1,5 +1,16 @@
 package view
 
-templ Dashboard(){
-    <h1>Hello</h1>
+import (
+	"github.com/JaiiR320/carlistingsaver/view/layout"
+	"github.com/JaiiR320/carlistingsaver/view/components"
+	"github.com/JaiiR320/carlistingsaver/types"
+)
+
+templ Dashboard(listings []types.Listing) {
+	@layout.Base() {
+		<h1>Dashboard</h1>
+		for _, listing := range listings {
+			@components.Listing(listing)
+		}
+	}
 }

@@ -1,13 +1,23 @@
 package layout
 
-templ Base(){
-    <html>
-        <head>
-            <title>My Page</title>
-        </head>
-        <body>
-            This is from Base
-            { children... }
-        </body>
-    </html>
+import "github.com/JaiiR320/carlistingsaver/view/components"
+
+templ Base() {
+	<!DOCTYPE html>
+	<html class="h-full bg-gray-100" lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="stylesheet" href="/view/output.css" type="text/css"/>
+			<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+			<title>You thought you could afford this...</title>
+		</head>
+		<body class="h-full">
+			<div class="text-blue-800">
+				test
+			</div>
+			@components.Navbar()
+			{ children... }
+		</body>
+	</html>
 }

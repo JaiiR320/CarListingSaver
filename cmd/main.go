@@ -56,7 +56,22 @@ func (s *Server) Run() {
 	router.DELETE("/admin/drop", apiHandler.HandleDropTables)
 
 	// HTML routes
-	router.GET("/", webHandler.HandleShowHome)
+	router.GET("/dashboard", webHandler.HandleShowDashboard)
 
+	router.GET("/view/output.css", getCss)
+	// router.File("/favicon.ico", "/favicon.ico")
+	router.GET("/favicon.ico", getFavicon)
 	router.Start(":3000")
+}
+
+func getFavicon(c echo.Context) error {
+	c.Response().Header().Set("Content-Type", "image/x-icon")
+	c.Response().WriteHeader(200)
+	return c.File("favicon.ico")
+}
+
+func getCss(c echo.Context) error {
+	c.Response().Header().Set("Content-Type", "text/css")
+	c.Response().WriteHeader(200)
+	return c.File("view/output.css")
 }

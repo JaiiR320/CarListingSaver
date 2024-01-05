@@ -1,0 +1,10 @@
+package components
+
+import "github.com/JaiiR320/carlistingsaver/types"
+
+templ Listing(listing types.Listing) {
+	<div>
+		<h1>{ listing.Title }</h1>
+	</div>
+	{ children... }
+}
