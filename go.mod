@@ -1,4 +1,4 @@
-module github.com/JaiiR320/echotest
+module github.com/JaiiR320/carlistingsaver
 
 go 1.21.5
 
@@ -7,6 +7,7 @@ require (
 	github.com/a-h/templ v0.2.513
 	github.com/chromedp/chromedp v0.9.3
 	github.com/labstack/echo/v4 v4.11.4
+	github.com/lib/pq v1.10.9
 )
 
 require (
