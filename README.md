@@ -2,9 +2,13 @@
 
 An API for saving car listings from Facebook. 
 
-# Built with
+## Built with
 
-Go, HTMX, templ, Echo, Tailwindcss
+Go, Echo, HTMX, templ, Tailwindcss
 
-# WIP
-wip
+## Roadmap
+
+- CI/CD
+- dockerize
+- improve UI/UX
+- simplify backend
